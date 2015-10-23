@@ -4,3 +4,5 @@
 *.wav
 
 /database/_mysql.py
+
+*.pyc
