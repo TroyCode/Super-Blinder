@@ -14,18 +14,6 @@ class Video:
       print str(i) + ". " + str(s)
       i += 1
 
-  # def audio_download_min(self, select, directory=None):
-  #   audiostreams = self.video.audiostreams
-
-  #   # select the most light weight file to download
-  #   prepare = audiostreams[select-1]
-  #   self.audio_filename = self.id + '.' + prepare.extension
-  #   if directory:
-  #     path = directory + '/' + self.audio_filename
-  #   else:
-  #     path = self.audio_filename
-  #   prepare.download(filepath=path)
-
   def audio_download_min(self, directory=None):
     # create new audiostream
     audiostreams = self.video.audiostreams
@@ -37,7 +25,7 @@ class Video:
 
     # process the filepath
     if directory:
-      path = directory + '/' + self.id + '.' + self.audio_extension
+      path = directory + self.id + '.' + self.audio_extension
     else:
       path = self.id + '.' + self.audio_extension
     prepare.download(filepath=path)
