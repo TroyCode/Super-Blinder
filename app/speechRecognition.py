@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-
 import speech_recognition as sr
 
 # obtain path to "test.wav" in the same folder as this script
 from os import path
 
 file = open("newfile.txt", "w")
+
+def transcript(input_path, )
 
 for x in range(0, 64):
   filename = "chunk{0}.wav".format(x)
@@ -14,7 +15,7 @@ for x in range(0, 64):
   # use "test.wav" as the audio source
   r = sr.Recognizer()
   with sr.WavFile(WAV_FILE) as source:
-      audio = r.record(source) # read the entire WAV file
+      audio = r.record(source) 
 
   # recognize speech using Google Speech Recognition
   try:
