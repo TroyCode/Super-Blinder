@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
 # using pydub
-def split(input_path, output_directory=None, output_name='chunk'):
+def split(input_path, output_directory=None):
   print "Start cutting"
   sound = AudioSegment.from_wav(input_path)
 
@@ -16,10 +16,16 @@ def split(input_path, output_directory=None, output_name='chunk'):
     silence_thresh = -50
   )
 
+  # export the chunk
   # i for the output file count
   i = 0
+  slash_index = input_path.rfind("/") + 1
+  filename = input_path[slash_index: -4]
   for i, chunk in enumerate(chunks):
-    chunk.export("{0}chunk{1}.wav".format(output_directory, i), format="wav")
+    chunk.export("{dir}{name}_{count}.wav".format(
+      dir=output_directory, 
+      name=filename, 
+      count=i), format="wav")
 
   print 'There are splited into {number} files'.format(number=i + 1)
 

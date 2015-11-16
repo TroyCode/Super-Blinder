@@ -51,7 +51,7 @@ t_download = st_download - START_TIME
 t_convert = st_convert - st_download
 t_split = st_split - st_convert
 t_total = st_split - START_TIME
-print "Time: download {}secs".format(t_download)
-print "      convert  {}secs".format(t_convert)
-print "      split    {}secs".format(t_split)
-print "      total    {}secs".format(t_total)
+print "Time: download {}secs".format(round(t_download, 1))
+print "      convert  {}secs".format(round(t_convert, 1))
+print "      split    {}secs".format(round(t_split, 1))
+print "      total    {}secs".format(round(t_total, 1))

@@ -7,7 +7,6 @@ from os import path
 file = open("newfile.txt", "w")
 
 def transcript(input_path, )
-
 for x in range(0, 64):
   filename = "chunk{0}.wav".format(x)
   WAV_FILE = path.join(path.dirname(path.realpath(__file__)), filename)
