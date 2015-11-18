@@ -2,6 +2,7 @@ import wave
 import contextlib
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
+import speech_recognition as sr
 
 # using pydub
 def split(input_path, output_directory=None):
@@ -11,7 +12,6 @@ def split(input_path, output_directory=None):
   chunks = split_on_silence(sound, 
     # must be silent for at least half a second
     min_silence_len = 500,
-
     # consider it silent if quieter than -50 dBFS
     silence_thresh = -50
   )
@@ -28,6 +28,7 @@ def split(input_path, output_directory=None):
       count=i), format="wav")
 
   print 'There are splited into {number} files'.format(number=i + 1)
+  return i + 1
 
 # using wave and contextlib
 def wav_duration(input_path):
@@ -36,3 +37,21 @@ def wav_duration(input_path):
     rate = f.getframerate()
     duration = frames / float(rate)
     return duration
+
+def transcript(input_path):
+  r = sr.Recognizer()
+  with sr.WavFile(input_path) as source:
+      audio = r.record(source) 
+
+  # recognize speech using Google Speech Recognition
+  try:
+      # for testing purposes, we're just using the default API key
+      # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+      # instead of `r.recognize_google(audio)`
+      return r.recognize_google(audio)
+  except sr.UnknownValueError:
+      # print "Google Speech Recognition could not understand audio"
+      return ""
+  except sr.RequestError:
+      print "Could not request results from Google Speech Recognition service"
+      return ""
