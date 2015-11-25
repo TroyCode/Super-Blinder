@@ -65,6 +65,7 @@ st_split = time.time()
 timeline = 0
 datalist = []
 for i in range(0, split_count-1):
+  print "processing({}/{})".format(i+1, split_count)
   filepath = SEGMENT_DIR + v.id + "_{}".format(i) + ".wav"
   sentence = audio.transcript(filepath)
   keys = stopword_filter(sentence)
@@ -85,6 +86,8 @@ os.system("rm {path}".format(path=input_path))
 print "original file has been deleted."
 os.system("rm {path}".format(path=converted_path))
 print "converted file has been deleted."
+os.system("rm {path}".format(path=SEGMENT_DIR+v.id+"*"))
+print "splited file has been deleted."
 
 st_done = time.time()
 

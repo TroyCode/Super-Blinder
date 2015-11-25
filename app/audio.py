@@ -13,7 +13,7 @@ def split(input_path, output_directory=None):
     # must be silent for at least half a second
     min_silence_len = 500,
     # consider it silent if quieter than -50 dBFS
-    silence_thresh = -50
+    silence_thresh = -34
   )
 
   # export the chunk
