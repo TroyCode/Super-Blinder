@@ -62,20 +62,34 @@ split_count = audio.split(converted_path, output_dir)
 st_split = time.time()
 
 # transcript
-timeline = 0
+from app import stastics
+stic = stastics.Words()
+timeline = 0.0
 datalist = []
 for i in range(0, split_count-1):
-  print "processing({}/{})".format(i+1, split_count)
+  start = time.time()
   filepath = SEGMENT_DIR + v.id + "_{}".format(i) + ".wav"
-  sentence = audio.transcript(filepath)
-  keys = stopword_filter(sentence)
-  data = {"time": round(timeline, 0), "sentence":sentence, "keywords":keys}
-  datalist.append(data)
-  timeline = timeline + audio.wav_duration(filepath)
+  dur = audio.wav_duration(filepath)
+  print "processing({}/{}) length:{} time:{}".format(i+1, split_count, dur, timeline)
+  if dur == 0:
+    print "# skip (0 sec)"
+  elif dur < 30:
+    sentence = audio.transcript(filepath)
+    keys = stopword_filter(sentence)    
+    stic.add_list(keys)
+    data = {"time": round(timeline, 1), "sentence":sentence, "keywords":keys}
+    datalist.append(data)
+    timeline = timeline + dur
+  else:
+    timeline = timeline + dur
+    print "# skip (over 30 secs)"
+stic.dic_sort()
 
 
 f = open(JSON_PATH+v.id+".json", 'w')
 f.write(json.dumps(datalist))
+f = open(JSON_PATH+v.id+"_stic.json", 'w')
+f.write(json.dumps(stic.count_list))
 
 st_tnf = time.time()
 
