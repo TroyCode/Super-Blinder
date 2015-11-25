@@ -1,16 +1,16 @@
 import os
 import argparse
-import time
 import json
-from app import youtube
 from app import audio
+from app import youtube
+from app import stastics
+
 
 BASE_DIR = "/home/troy/project/SuperBlinder/"
 APP_DIR = BASE_DIR + "app/"
 JSON_PATH = BASE_DIR + "tmp/json/"
 MEDIA_DIR = BASE_DIR + "tmp/media/"
 SEGMENT_DIR = BASE_DIR + "tmp/segment/"
-START_TIME = time.time()
 
 
 def stopword_filter(sentence):
@@ -31,69 +31,69 @@ def stopword_filter(sentence):
 
   return key_list
 
-
+def convert_mono(input_path, output_path):
+  command = 'ffmpeg -i {input} -acodec pcm_s16le -ac 1 -ar 16000 {output}'.format(
+    input=input_path, 
+    output=output_path
+    )
+  os.system(command)
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--videoId', help='youtube video ID')
 args = parser.parse_args()
+
+# time and word stastics instance
+stic_t = stastics.Times()
+stic_w = stastics.Words()
 
 # create new video instance
 # select the minimum audio to download
 vid = args.videoId
 v = youtube.Video(vid)
 v.audio_download_min(MEDIA_DIR)
-st_download = time.time()
+stic_t.add_stamp("download")
 
-# convert to wav mono
+# path varible
 input_path = MEDIA_DIR + v.id + "." + v.audio_extension
 converted_path = MEDIA_DIR + v.id + ".wav"
-command = 'ffmpeg -i {input} -acodec pcm_s16le -ac 1 -ar 16000 {output}'.format(
-  input=input_path, 
-  output=converted_path
-  )
-os.system(command)
 
-st_convert = time.time()
+# convert
+convert_mono(input_path, converted_path)
+stic_t.add_stamp("convert")
 
 # split
 output_dir = SEGMENT_DIR
 split_count = audio.split(converted_path, output_dir)
-
-st_split = time.time()
+stic_t.add_stamp("split")
 
 # transcript
-from app import stastics
-stic = stastics.Words()
 timeline = 0.0
 datalist = []
 for i in range(0, split_count-1):
-  start = time.time()
   filepath = SEGMENT_DIR + v.id + "_{}".format(i) + ".wav"
   dur = audio.wav_duration(filepath)
-  print "processing({}/{}) length:{} time:{}".format(i+1, split_count, dur, timeline)
+  print "processing({}/{}):  length:{}  accmulation:{}".format(
+    i+1, split_count, round(dur, 1), round(timeline, 1))
   if dur == 0:
-    print "# skip (0 sec)"
+    print "\t# skip (0 sec)"
   elif dur < 30:
     sentence = audio.transcript(filepath)
     keys = stopword_filter(sentence)    
-    stic.add_list(keys)
+    stic_w.add_list(keys)
     data = {"time": round(timeline, 1), "sentence":sentence, "keywords":keys}
     datalist.append(data)
     timeline = timeline + dur
   else:
     timeline = timeline + dur
-    print "# skip (over 30 secs)"
-stic.dic_sort()
+    print "\t# skip (over 30 secs)"
+stic_w.dic_sort()
 
-
+# json output
 f = open(JSON_PATH+v.id+".json", 'w')
 f.write(json.dumps(datalist))
 f = open(JSON_PATH+v.id+"_stic.json", 'w')
-f.write(json.dumps(stic.count_list))
-
-st_tnf = time.time()
-
-
+f.write(json.dumps(stic_w.count_list))
+stic_t.add_stamp("transcript")
 
 # delete all temprory file
 os.system("rm {path}".format(path=input_path))
@@ -103,16 +103,4 @@ print "converted file has been deleted."
 os.system("rm {path}".format(path=SEGMENT_DIR+v.id+"*"))
 print "splited file has been deleted."
 
-st_done = time.time()
-
-# calculate per processing time
-t_download = st_download - START_TIME
-t_convert = st_convert - st_download
-t_split = st_split - st_convert
-t_tns = st_tnf - st_split
-t_total = st_tnf - START_TIME
-print "Time: download   {}secs".format(round(t_download, 1))
-print "      convert    {}secs".format(round(t_convert, 1))
-print "      split      {}secs".format(round(t_split, 1))
-print "      transcript {}secs".format(round(t_tns, 1))
-print "      total      {}secs".format(round(t_total, 1))
+stic_t.print_result()
