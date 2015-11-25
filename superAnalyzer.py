@@ -2,7 +2,6 @@ import os
 import argparse
 import json
 from app import audio
-from app import youtube
 from app import stastics
 
 
@@ -39,23 +38,19 @@ def convert_mono(input_path, output_path):
   os.system(command)
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--videoId', help='youtube video ID')
+parser.add_argument('--filename', help='filename include extension')
 args = parser.parse_args()
 
 # time and word stastics instance
 stic_t = stastics.Times()
 stic_w = stastics.Words()
 
-# create new video instance
-# select the minimum audio to download
-vid = args.videoId
-v = youtube.Video(vid)
-v.audio_download_min(MEDIA_DIR)
-stic_t.add_stamp("download")
+filename = args.filename[:-4]
+extension = args.filename[-3:]
 
 # path varible
-input_path = MEDIA_DIR + v.id + "." + v.audio_extension
-converted_path = MEDIA_DIR + v.id + ".wav"
+input_path = MEDIA_DIR + filename + "." + extension
+converted_path = MEDIA_DIR + filename + ".wav"
 
 # convert
 convert_mono(input_path, converted_path)
@@ -70,7 +65,7 @@ stic_t.add_stamp("split")
 timeline = 0.0
 datalist = []
 for i in range(0, split_count-1):
-  filepath = SEGMENT_DIR + v.id + "_{}".format(i) + ".wav"
+  filepath = SEGMENT_DIR + filename + "_{}".format(i) + ".wav"
   dur = audio.wav_duration(filepath)
   print "processing({}/{}):  length:{}  accmulation:{}".format(
     i+1, split_count, round(dur, 1), round(timeline, 1))
@@ -89,9 +84,9 @@ for i in range(0, split_count-1):
 stic_w.dic_sort()
 
 # json output
-f = open(JSON_PATH+v.id+".json", 'w')
+f = open(JSON_PATH+filename+".json", 'w')
 f.write(json.dumps(datalist))
-f = open(JSON_PATH+v.id+"_stic.json", 'w')
+f = open(JSON_PATH+filename+"_stic.json", 'w')
 f.write(json.dumps(stic_w.count_list))
 stic_t.add_stamp("transcript")
 
@@ -100,7 +95,7 @@ os.system("rm {path}".format(path=input_path))
 print "original file has been deleted."
 os.system("rm {path}".format(path=converted_path))
 print "converted file has been deleted."
-os.system("rm {path}".format(path=SEGMENT_DIR+v.id+"*"))
+os.system("rm {path}".format(path=SEGMENT_DIR+filename+"*"))
 print "splited file has been deleted."
 
 stic_t.print_result()
