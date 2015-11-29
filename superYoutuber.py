@@ -79,7 +79,7 @@ for i in range(0, split_count-1):
   elif dur < 30:
     sentence = audio.transcript(filepath)
     keys = stopword_filter(sentence)    
-    stic_w.add_list(keys)
+    stic_w.add_list(keys, timeline)
     data = {"time": round(timeline, 1), "sentence":sentence, "keywords":keys}
     datalist.append(data)
     timeline = timeline + dur
