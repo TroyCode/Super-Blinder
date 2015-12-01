@@ -64,7 +64,7 @@ stic_t.add_stamp("split")
 # transcript
 timeline = 0.0
 datalist = []
-for i in range(0, split_count-1):
+for i in range(0, split_count):
   filepath = SEGMENT_DIR + filename + "_{}".format(i) + ".wav"
   dur = audio.wav_duration(filepath)
   print "processing({}/{}):  length:{}  accmulation:{}".format(
